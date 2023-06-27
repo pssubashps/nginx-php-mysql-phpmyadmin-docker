@@ -1,0 +1,49 @@
+version: "3"
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    ports: 
+      - "8080:80"
+    networks:
+      - internal
+    volumes:
+      - ./src/:/var/www/html
+      - /logs/nginx:/var/log/nginx/
+  php:
+    build: 
+      context: .
+      dockerfile: php/Dockerfile
+    networks:
+      - internal
+    volumes:
+      - ./src/:/var/www/html
+      - ./logs/php.log:/var/log/fpm-php.www.log
+  db:
+    container_name: db
+    image: mysql
+    restart: always
+    environment:
+        MYSQL_ROOT_PASSWORD: subash
+        MYSQL_DATABASE: subash
+        MYSQL_USER: subash
+        MYSQL_PASSWORD: subash
+    ports:
+        - "3306:3306"
+    networks:
+      - internal
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+        - '8081:80'
+    restart: always
+    environment:
+        PMA_HOST: db
+    networks:
+      - internal
+    depends_on:
+        - db
+networks:
+  internal:
+    driver: bridge
